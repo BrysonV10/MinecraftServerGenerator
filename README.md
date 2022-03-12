@@ -10,3 +10,7 @@ Easy setup steps coming soon.
 ~~PaperMC Setup~~ **Implemented**     
 Automatic Update Checks so your system keeps itself up to date.     
 Windows support   
+ 
+  
+   
+### [Download Now](https://github.com/BrysonV10/MinecraftServerGenerator/blob/main/servergenerator.py?raw=1)
