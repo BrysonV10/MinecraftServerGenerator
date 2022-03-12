@@ -7,6 +7,6 @@ Currently this has only been tested on Ubuntu 20.04+, but theoretically this sho
 Easy setup steps coming soon. 
   
 ### Features Coming Soon
-~~PaperMC Setup~~ Implemented     
+~~PaperMC Setup~~ **Implemented**     
 Automatic Update Checks so your system keeps itself up to date.     
 Windows support   
