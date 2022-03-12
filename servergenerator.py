@@ -7,7 +7,7 @@ else:
 
 #Utility:
 def clearTerm(): os.system('cls' if os.name == 'nt' else 'clear')
-
+UtilVersion = "0.9"
 #Color Functions
 end = "\u001b[0m"
 def red(text:str): return "\u001b[31m" + text + end
@@ -67,7 +67,7 @@ def downloadFile(fileName, URL):
                             sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
                             sys.stdout.flush()
                 else:
-                    print(red("Failed to download server file. HTTP Error - " + response.status_code))
+                    print(red("Failed to download server file. HTTP Error - " + str(response.status_code)))
                     quit()
             f.close()
 
@@ -75,28 +75,29 @@ def downloadFile(fileName, URL):
 
 while True:
     clearTerm()
-    print(yellow("Minecraft Server Generator *Beta*"))
+    print(yellow("Minecraft Server Generator v"+ UtilVersion))
     print("Pick an option:")
     print("Java Version: v" + str(javaVersion))
     if Verbose: print(blue("Verbose Mode On"))
     print(green("1. Generate Vanilla Java Server"))
     print(green("2. Generate Spigot Java Server"))
     print(green("3. Generate Vanilla Bedrock Server"))
-    print(green("4. Exit"))
+    print(green("4. Generate PaperMC Java Server"))
+    print(green("5. Exit"))
     
-    prompt = input("Select ID [1-4]   >")
+    prompt = input("Select ID [1-5]   >")
     try:
         prompt = int(prompt)
     except Exception:
         print(red("Enter a Valid ID"))
         time.sleep(3)
         continue
-    if prompt not in [1,2,3,4]:
+    if prompt not in [1,2,3,4,5]:
         print(red("Enter a Valid ID"))
         time.sleep(3)
         continue
     clearTerm()
-    if prompt == 4:
+    if prompt == 5:
         print(red("User prompted to quit."))
         quit()
 
@@ -252,17 +253,48 @@ while True:
         print(green("Your server is now set up!"))
         print("Click enter to go to the main menu")
         input()
-        
-
-        
-
-
-
-
-
-
-
-
-        
-
-
+    
+    elif prompt == 4:
+        try:
+            directoryName = os.path.dirname(os.path.realpath(sys.argv[0]))
+            subprocess.run(["mkdir", directoryName + "/" + folderName]) if Verbose else subprocess.run(["mkdir", directoryName + "/" + folderName], stdout=subprocess.PIPE)
+            os.chdir(directoryName + f"/{folderName}")
+        except Exception as e:
+            print(red("Error Creating Directory"))
+            print(red(str(e)))
+            quit()
+        print(yellow("Preparing to create a PaperMC Server."))
+        print(yellow("Would you like to continue? [Y/N]"))
+        toContinue = input(">")
+        if toContinue.lower() != 'y':
+            print(red("User prompted to quit."))
+            quit()
+        r = requests.get("https://papermc.io/api/v2/projects/paper")
+        paperversion = r.json()["versions"][-1]
+        if Verbose: print(yellow("Getting Server Version " + paperversion))
+        r = requests.get("https://papermc.io/api/v2/projects/paper/versions/" + paperversion)
+        paperbuildnum = r.json()["builds"][-1]
+        if Verbose: print(yellow("Paper Build #"+ str(paperbuildnum)))
+        r = requests.get(f"https://papermc.io/api/v2/projects/paper/versions/{paperversion}/builds/{str(paperbuildnum)}")
+        paperdownloadfile = r.json()["downloads"]["application"]["name"]
+        if Verbose: print(yellow("File: "+ paperdownloadfile))
+        fileURL = f"https://papermc.io/api/v2/projects/paper/versions/{paperversion}/builds/{str(paperbuildnum)}/downloads/{paperdownloadfile}"
+        if Verbose: print(yellow("URL: " + fileURL))
+        downloadFile(paperdownloadfile, fileURL)
+        print(green("Paper .jar File Downloaded Successfully"))
+        subprocess.run(["java", "-jar", paperdownloadfile]) if Verbose else subprocess.run(["java", "-jar", paperdownloadfile], stdout=subprocess.PIPE)
+        print(yellow("Signing EULA"))
+        eula = open("eula.txt", "w+")
+        eula.write("eula=true")
+        eula.close()
+        print(green("EULA Signed!"))
+        print(yellow("Would you like to create an easy start script? [Y/N]"))
+        p = input(">")
+        if p.lower() == "y":
+            ezstartfile = open("start.sh", "w+")
+            ezstartfile.write("java -jar " + paperdownloadfile)
+            ezstartfile.close()
+            print(green("Easy Start Script Complete"))
+        print(green("Server Setup Complete!"))
+        print("Press enter to go to the main menu")
+        input()
