@@ -28,6 +28,50 @@ else:
     print(red("Failed to find compatible Java runtime. Please install Java before running this script."))
     quit()
 
+def downloadFile(fileName, URL):
+    with open(fileName, "wb+") as f:
+            print(yellow("Downloading %s" % fileName))
+            response = requests.get(URL, stream=True)
+            if response.status_code == requests.codes.ok:
+                total_length = response.headers.get('content-length')
+
+                if total_length is None: # no content length header
+                    f.write(response.content)
+                else:
+                    dl = 0
+                    total_length = int(total_length)
+                    for data in response.iter_content(chunk_size=4096):
+                        dl += len(data)
+                        f.write(data)
+                        done = int(50 * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
+                        sys.stdout.flush()
+                print(green("\nDownload Complete"))
+                
+            else:
+                print(red("Server file Failed to Download. Trying Again"))
+                print(yellow("Downloading %s" % fileName))
+                response = requests.get(URL, stream=True)
+                if response.status_code == requests.codes.ok:
+                    total_length = response.headers.get('content-length')
+
+                    if total_length is None: # no content length header
+                        f.write(response.content)
+                    else:
+                        dl = 0
+                        total_length = int(total_length)
+                        for data in response.iter_content(chunk_size=4096):
+                            dl += len(data)
+                            f.write(data)
+                            done = int(50 * dl / total_length)
+                            sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
+                            sys.stdout.flush()
+                else:
+                    print(red("Failed to download server file. HTTP Error - " + response.status_code))
+                    quit()
+            f.close()
+
+
 
 while True:
     clearTerm()
@@ -65,7 +109,7 @@ while True:
         continue
     print(yellow("Directory will be created at " + os.path.dirname(os.path.realpath(sys.argv[0]))+ "/"+ folderName))
     if prompt == 1:
-        print(green("Preparing to create a Minecraft Vanilla server."))
+        print(green("Preparing to create a Minecraft Java Vanilla server."))
         print(yellow("Would you like to continue? [Y/N]"))
         toContinue = input(">")
         if toContinue.lower() != 'y':
@@ -99,22 +143,7 @@ while True:
             fServerVersion = ""
         print(green("Download URL Retrieved. Starting Download..."))
         fileName = "minecraft-server" + fServerVersion+".jar"
-        r = requests.get(serverUrl)
-        if r.status_code == requests.codes.ok:
-            serverFile = open(fileName, "wb+")
-            serverFile.write(r.content)
-            serverFile.close()
-        else:
-            print(red("Server File Failed to Download. Trying Again."))
-            r = requests.get(serverUrl)
-            if r.status_code != requests.codes.ok:
-                print(red("Failed to download server jar file. HTTP Code " + str(r.status_code)))
-                quit()
-            else:
-                serverFile = open(fileName, "wb+")
-                serverFile.write(r.content)
-                serverFile.close()
-        print(green("Server File Downloaded!"))
+        downloadFile(fileName, serverUrl)
         print(yellow("Preparing Server Setup..."))
         subprocess.run(["java", "-jar", fileName]) if Verbose else subprocess.run(["java", "-jar", fileName], stdout=subprocess.PIPE)
         eula = open("eula.txt", "w")
@@ -154,21 +183,7 @@ while True:
             print(red(str(e)))
             quit()
         print(yellow("Beginning BuildTools Download..."))
-        r = requests.get("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
-        if r.status_code == requests.codes.ok:
-            buildtools = open("BuildTools.jar", "wb+")
-            buildtools.write(r.content)
-            buildtools.close()
-        else:
-            print(red("BuildTools.jar failed to download. Trying again."))
-            r = requests.get("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
-            if r.status_code == requests.codes.ok:
-                buildtools = open("BuildTools.jar", "wb+")
-                buildtools.write(r.content)
-                buildtools.close()
-            else:
-                print(red("Failed to download BuildTools.jar. HTTP Code - " + str(r.status_code)))
-                quit()
+        downloadFile("BuildTools.jar", "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
         print(green("BuildTools was downloaded. Building your server..."))
         subprocess.run(["java", "-jar", "BuildTools.jar", "--rev", "latest"]) if Verbose else subprocess.run(["java", "-jar", "BuildTools.jar", "--rev", "latest"], stdout=subprocess.PIPE)
         f = []
@@ -231,49 +246,7 @@ while True:
             fServerVersion = ""
         print(green("Download URL Retrieved. Starting Download..."))
         fileName = "bedrock-server" + fServerVersion+".zip"
-        
-        with open(fileName, "wb+") as f:
-            print(yellow("Downloading %s" % fileName))
-            response = requests.get(serverUrl, stream=True)
-            if response.status_code == requests.codes.ok:
-                total_length = response.headers.get('content-length')
-
-                if total_length is None: # no content length header
-                    f.write(response.content)
-                else:
-                    dl = 0
-                    total_length = int(total_length)
-                    for data in response.iter_content(chunk_size=4096):
-                        dl += len(data)
-                        f.write(data)
-                        done = int(50 * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
-                        sys.stdout.flush()
-                print("\nDownload Complete")
-                
-            else:
-                print(red("Server file Failed to Download. Trying Again"))
-                print(yellow("Downloading %s" % fileName))
-                response = requests.get(serverUrl, stream=True)
-                if response.status_code == requests.codes.ok:
-                    total_length = response.headers.get('content-length')
-
-                    if total_length is None: # no content length header
-                        f.write(response.content)
-                    else:
-                        dl = 0
-                        total_length = int(total_length)
-                        for data in response.iter_content(chunk_size=4096):
-                            dl += len(data)
-                            f.write(data)
-                            done = int(50 * dl / total_length)
-                            sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
-                            sys.stdout.flush()
-                else:
-                    print(red("Failed to download server file. HTTP Error - " + response.status_code))
-                    quit()
-            f.close()
-
+        downloadFile(fileName, serverUrl)
         print(yellow("Preparing Server Setup..."))
         subprocess.run(["unzip", fileName]) if Verbose else subprocess.run(["unzip", fileName], stdout=subprocess.PIPE)
         print(green("Your server is now set up!"))
