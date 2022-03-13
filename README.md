@@ -8,9 +8,9 @@ Easy setup steps coming soon.
   
 ### Features Coming Soon
 ~~PaperMC Setup~~ **Implemented**     
-Automatic Update Checks so your system keeps itself up to date.     
+~~Automatic Update Checks so your system keeps itself up to date.     ~~
 Windows support   
- 
+Automatic Hash Checking for extra security   
   
    
 ### [Download Now](https://github.com/BrysonV10/MinecraftServerGenerator/blob/main/servergenerator.py?raw=1)
