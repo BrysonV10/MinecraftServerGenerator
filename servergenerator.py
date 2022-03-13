@@ -4,7 +4,7 @@ if "-v" in sys.argv:
     Verbose = True
 else:
     Verbose = False
-
+UpdateAvailable = False
 #Utility:
 def clearTerm(): os.system('cls' if os.name == 'nt' else 'clear')
 UtilVersion = "1"
