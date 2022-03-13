@@ -7,7 +7,7 @@ else:
 
 #Utility:
 def clearTerm(): os.system('cls' if os.name == 'nt' else 'clear')
-UtilVersion = "0.9"
+UtilVersion = "1"
 #Color Functions
 end = "\u001b[0m"
 def red(text:str): return "\u001b[31m" + text + end
@@ -71,6 +71,24 @@ def downloadFile(fileName, URL):
                     quit()
             f.close()
 
+print("Checking for update...")
+r = requests.get("https://github.com/BrysonV10/MinecraftServerGenerator/blob/main/latestversion.txt?raw=1", allow_redirects=True, headers={'Cache-Control': 'no-cache'})
+cloudVersion = r.text.strip()
+if cloudVersion != UtilVersion:
+    print(yellow("Update Available"))
+    print("Would you like to update now? [Y/N]")
+    if input(">").lower() == "y":
+        UpdateAvailable = False
+        print("Starting update")
+        if Verbose: print("updating to version " + cloudVersion)
+        subprocess.run(["mv", "servergenerator.py", "oldservergenerator.py"])
+        downloadFile("servergenerator.py", "https://github.com/BrysonV10/MinecraftServerGenerator/blob/main/servergenerator.py?raw=1")
+        subprocess.run(["rm", "oldservergenerator.py"])
+        clearTerm()
+        print(green("Update Complete, please restart the program."))
+        quit()
+    else:
+        UpdateAvailable = True
 
 
 while True:
@@ -79,6 +97,7 @@ while True:
     print("Pick an option:")
     print("Java Version: v" + str(javaVersion))
     if Verbose: print(blue("Verbose Mode On"))
+    if UpdateAvailable: print(blue("Update Available"))
     print(green("1. Generate Vanilla Java Server"))
     print(green("2. Generate Spigot Java Server"))
     print(green("3. Generate Vanilla Bedrock Server"))
