@@ -2,7 +2,7 @@
 
 An easy Python script to create Minecraft servers fast on Linux.
 
-Currently this has only been tested on Ubuntu 20.04+, but theoretically this should work on any distro. 
+Currently this has only been tested on Ubuntu 20.04+ and Debian 10, but theoretically this should work on any distro. 
 
 Easy setup steps coming soon. 
   
