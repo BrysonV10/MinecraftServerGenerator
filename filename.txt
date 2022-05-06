@@ -1,1 +1,1 @@
-servergenerator.py
+servergenerator
